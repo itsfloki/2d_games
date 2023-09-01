@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "tik_tak_toe"
 ]
 
 [workspace.dependencies]
