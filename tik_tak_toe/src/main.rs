@@ -1,3 +1,4 @@
+use crand::seq::SliceRandom;
 use macroquad::prelude::*;
 
 #[macroquad::main("Tik Tak Toe")]
@@ -12,7 +13,6 @@ async fn main() {
     let cell_height = (grid_height / rows) as f32;
 
     let mut grid: [[Grid; 3]; 3] = [[Grid::default(); 3]; 3];
-    let mut player_turn: bool = false;
 
     for row in 0..rows {
         for col in 0..cols {
@@ -83,18 +83,18 @@ async fn main() {
                     {
                         match col.player {
                             Player::Nil => {
-                                col.player = if player_turn {
-                                    Player::Cross
-                                } else {
-                                    Player::Cricle
-                                };
+                                col.player = Player::Cricle;
                             }
                             _ => {}
                         }
-                        player_turn = !player_turn;
                         break;
                     }
                 }
+            }
+
+            // get computer move
+            if let Some((i, j)) = get_random_choice(&grid) {
+                grid[i][j].player = Player::Cross;
             }
         }
 
@@ -149,4 +149,18 @@ fn draw_cross(x: f32, y: f32, line_length: f32, thickness: f32, color: Color) {
 
     draw_line(x1, y1, x2, y2, thickness, color);
     draw_line(x3, y3, x4, y4, thickness, color);
+}
+
+fn get_random_choice(grid: &[[Grid; 3]; 3]) -> Option<(usize, usize)> {
+    let mut spots: Vec<(usize, usize)> = Vec::new();
+
+    for (i, row) in grid.iter().enumerate() {
+        for (j, col) in row.iter().enumerate() {
+            if let Player::Nil = col.player {
+                spots.push((i, j));
+            }
+        }
+    }
+
+    spots.choose(&mut crand::thread_rng()).copied()
 }

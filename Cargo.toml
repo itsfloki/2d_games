@@ -6,3 +6,4 @@ members = [
 
 [workspace.dependencies]
 macroquad = "0.4"
+crand = { version = "0.8.5", package = "rand"}
