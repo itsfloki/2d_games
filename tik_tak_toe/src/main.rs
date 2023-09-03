@@ -12,7 +12,6 @@ async fn main() {
     let cell_height = (grid_height / rows) as f32;
 
     let mut grid: [[Grid; 3]; 3] = [[Grid::default(); 3]; 3];
-    let mut draw_shape_coordinates: Vec<(f32, f32, Player)> = Vec::new();
     let mut player_turn: bool = false;
 
     for row in 0..rows {
@@ -27,6 +26,7 @@ async fn main() {
                 y: cell_y,
                 center_x,
                 center_y,
+                player: Player::Nil,
             };
         }
     }
@@ -34,7 +34,7 @@ async fn main() {
     loop {
         clear_background(DARKGRAY);
 
-        // draw grid
+        // draw grid & shape
         for row in grid {
             for col in row {
                 draw_rectangle_lines(
@@ -44,29 +44,28 @@ async fn main() {
                     cell_height,
                     grid_thickness,
                     WHITE,
-                )
-            }
-        }
+                );
 
-        for coordinates in &draw_shape_coordinates {
-            match coordinates.2 {
-                Player::Cross => {
-                    draw_cross(
-                        coordinates.0,
-                        coordinates.1,
-                        70.0,
-                        10.0,
-                        YELLOW,
-                    );
-                }
-                Player::Cricle => {
-                    draw_circle_lines(
-                        coordinates.0,
-                        coordinates.1,
-                        30.0,
-                        10.0,
-                        YELLOW,
-                    );
+                match col.player {
+                    Player::Nil => {}
+                    Player::Cross => {
+                        draw_cross(
+                            col.center_x,
+                            col.center_y,
+                            70.0,
+                            10.0,
+                            BLUE,
+                        );
+                    }
+                    Player::Cricle => {
+                        draw_circle_lines(
+                            col.center_x,
+                            col.center_y,
+                            30.0,
+                            10.0,
+                            GREEN,
+                        );
+                    }
                 }
             }
         }
@@ -75,22 +74,23 @@ async fn main() {
         if is_mouse_button_pressed(MouseButton::Left) {
             let (x, y) = mouse_position();
 
-            for row in grid {
-                for col in row {
+            for row in grid.iter_mut() {
+                for col in row.iter_mut() {
                     if (x >= col.x)
                         && (x <= (col.x + cell_width))
                         && (y >= col.y)
                         && (y <= (col.y + cell_height))
                     {
-                        draw_shape_coordinates.push((
-                            col.center_x,
-                            col.center_y,
-                            if player_turn {
-                                Player::Cross
-                            } else {
-                                Player::Cricle
-                            },
-                        ));
+                        match col.player {
+                            Player::Nil => {
+                                col.player = if player_turn {
+                                    Player::Cross
+                                } else {
+                                    Player::Cricle
+                                };
+                            }
+                            _ => {}
+                        }
                         player_turn = !player_turn;
                         break;
                     }
@@ -102,17 +102,20 @@ async fn main() {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct Grid {
     x: f32,
     y: f32,
     center_x: f32,
     center_y: f32,
+    player: Player,
 }
 
+#[derive(Copy, Clone, Debug)]
 enum Player {
     Cross,
     Cricle,
+    Nil,
 }
 
 impl Default for Grid {
@@ -122,6 +125,7 @@ impl Default for Grid {
             y: 0.0,
             center_x: 0.0,
             center_y: 0.0,
+            player: Player::Nil,
         }
     }
 }
