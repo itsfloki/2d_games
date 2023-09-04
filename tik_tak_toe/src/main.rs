@@ -57,7 +57,7 @@ async fn main() {
                             BLUE,
                         );
                     }
-                    Player::Cricle => {
+                    Player::Circle => {
                         draw_circle_lines(
                             col.center_x,
                             col.center_y,
@@ -83,7 +83,7 @@ async fn main() {
                     {
                         match col.player {
                             Player::Nil => {
-                                col.player = Player::Cricle;
+                                col.player = Player::Circle;
                             }
                             _ => {}
                         }
@@ -96,6 +96,31 @@ async fn main() {
             if let Some((i, j)) = get_random_choice(&grid) {
                 grid[i][j].player = Player::Cross;
             }
+        }
+
+        // check_winner
+        let cross_player = check_winner(&grid, Player::Cross);
+        let circle_player = check_winner(&grid, Player::Circle);
+
+        if cross_player.0 {
+            draw_line(
+                cross_player.1[0].0,
+                cross_player.1[0].1,
+                cross_player.1[2].0,
+                cross_player.1[2].1,
+                10.0,
+                BLUE,
+            );
+        }
+        if circle_player.0 {
+            draw_line(
+                circle_player.1[0].0,
+                circle_player.1[0].1,
+                circle_player.1[2].0,
+                circle_player.1[2].1,
+                10.0,
+                GREEN,
+            );
         }
 
         next_frame().await
@@ -111,10 +136,10 @@ struct Grid {
     player: Player,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum Player {
     Cross,
-    Cricle,
+    Circle,
     Nil,
 }
 
@@ -163,4 +188,73 @@ fn get_random_choice(grid: &[[Grid; 3]; 3]) -> Option<(usize, usize)> {
     }
 
     spots.choose(&mut crand::thread_rng()).copied()
+}
+
+fn check_winner(
+    grid: &[[Grid; 3]; 3],
+    player: Player,
+) -> (bool, Vec<(f32, f32)>) {
+    let mut flag = false;
+    let mut test: Vec<(f32, f32)> = Vec::new();
+
+    // check rows
+    for (_i, row) in grid.iter().enumerate() {
+        for (_j, col) in row.iter().enumerate() {
+            if col.player == player {
+                flag = true;
+                test.push((col.center_x, col.center_y));
+            } else {
+                flag = false;
+                test.pop();
+                break;
+            }
+        }
+
+        if flag {
+            return (flag, test);
+        }
+    }
+
+    // check columns
+    for (col, _) in grid[0].iter().enumerate() {
+        flag = false;
+        for (row, _) in grid.iter().enumerate() {
+            if grid[row][col].player == player {
+                flag = true;
+                test.push((grid[row][col].center_x, grid[row][col].center_y));
+            } else {
+                flag = false;
+                test.pop();
+                break;
+            }
+        }
+
+        if flag == true {
+            return (flag, test);
+        }
+    }
+
+    // check diagonals
+    if (grid[0][0].player == player)
+        && (grid[1][1].player == player)
+        && (grid[2][2].player == player)
+    {
+        test.push((grid[0][0].center_x, grid[0][0].center_y));
+        test.push((grid[1][1].center_x, grid[1][1].center_y));
+        test.push((grid[2][2].center_x, grid[2][2].center_y));
+
+        return (true, test);
+    }
+
+    if (grid[0][2].player == player)
+        && (grid[1][1].player == player)
+        && (grid[2][0].player == player)
+    {
+        test.push((grid[0][2].center_x, grid[0][2].center_y));
+        test.push((grid[1][1].center_x, grid[1][1].center_y));
+        test.push((grid[2][0].center_x, grid[2][0].center_y));
+        return (true, test);
+    }
+
+    (flag, test)
 }
