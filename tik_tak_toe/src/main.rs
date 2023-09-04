@@ -34,6 +34,7 @@ async fn main() {
     loop {
         clear_background(DARKGRAY);
 
+
         // draw grid & shape
         for row in grid {
             for col in row {
@@ -103,6 +104,7 @@ async fn main() {
         let circle_player = check_winner(&grid, Player::Circle);
 
         if cross_player.0 {
+            draw_text("Winner is X", screen_width() - 200.0, 200.0, 30.0, YELLOW);
             draw_line(
                 cross_player.1[0].0,
                 cross_player.1[0].1,
@@ -112,7 +114,9 @@ async fn main() {
                 BLUE,
             );
         }
+
         if circle_player.0 {
+            draw_text("Winner is O", screen_width() - 200.0, 200.0, 30.0, YELLOW);
             draw_line(
                 circle_player.1[0].0,
                 circle_player.1[0].1,
