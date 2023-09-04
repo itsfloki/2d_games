@@ -1,8 +1,12 @@
 use crand::seq::SliceRandom;
-use macroquad::prelude::*;
+use macroquad::{audio, prelude::*};
 
 #[macroquad::main("Tik Tak Toe")]
 async fn main() {
+    set_pc_assets_folder("assets");
+
+    let sound = audio::load_sound("sound.wav").await.unwrap();
+
     let grid_thickness = 2.0;
     let grid_width = 500;
     let grid_height = 500;
@@ -92,6 +96,7 @@ async fn main() {
                         match col.player {
                             Player::Nil => {
                                 col.player = Player::Circle;
+                                audio::play_sound_once(&sound);
                             }
                             _ => {}
                         }
