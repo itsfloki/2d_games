@@ -1,3 +1,5 @@
+use std::{thread, time::Duration};
+
 use crand::seq::SliceRandom;
 use macroquad::prelude::*;
 
@@ -72,6 +74,14 @@ async fn main() {
         }
 
         // mouse event
+        if is_mouse_button_pressed(MouseButton::Right) {
+            for row in grid.iter_mut() {
+                for col in row.iter_mut() {
+                    col.player = Player::Nil;
+                }
+            }
+        }
+
         if is_mouse_button_pressed(MouseButton::Left) {
             let (x, y) = mouse_position();
 
@@ -104,7 +114,8 @@ async fn main() {
         let circle_player = check_winner(&grid, Player::Circle);
 
         if cross_player.0 {
-            draw_text("Winner is X", screen_width() - 200.0, 200.0, 30.0, YELLOW);
+            draw_text("Winner is X", screen_width() - 300.0, 200.0, 30.0, YELLOW);
+            draw_text("Right click to restart", screen_width() - 300.0, 230.0, 30.0, YELLOW);
             draw_line(
                 cross_player.1[0].0,
                 cross_player.1[0].1,
@@ -116,7 +127,8 @@ async fn main() {
         }
 
         if circle_player.0 {
-            draw_text("Winner is O", screen_width() - 200.0, 200.0, 30.0, YELLOW);
+            draw_text("Winner is O. ", screen_width() - 300.0, 200.0, 30.0, YELLOW);
+            draw_text("Right click to restart", screen_width() - 300.0, 230.0, 30.0, YELLOW);
             draw_line(
                 circle_player.1[0].0,
                 circle_player.1[0].1,
